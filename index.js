@@ -6,4 +6,10 @@ const packageStr = fs.readFileSync(path.resolve(__dirname, "package.json"), {
 });
 const package = JSON.parse(packageStr);
 
-console.log(package);
+const nameOption = process.argv.includes("--name");
+
+if (nameOption) {
+  console.log(package.name);
+} else {
+  console.log("オプションがありません");
+}
