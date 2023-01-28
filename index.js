@@ -1,15 +1,30 @@
+#!usr/bin/env node
 const path = require("path");
-const fs = require("fs");
+const { marked } = require("marked");
+const yargs = require("yargs/yargs");
+const { hideBin } = require("yargs/helpers"); // process.argv.slice(2)のショートハンド
+const { getPackageName } = require("./lib/name");
+const { readMarkdownFileSync, writeHtmlFileSync } = require("./lib/file");
 
-const packageStr = fs.readFileSync(path.resolve(__dirname, "package.json"), {
-  encoding: "utf-8",
-});
-const package = JSON.parse(packageStr);
+const { argv } = yargs(hideBin(process.argv))
+  .option("name", {
+    describe: "CLI名を表示",
+  })
+  .option("file", {
+    describe: "Markdownファイルのパス",
+  })
+  .option("out", {
+    describe: "html file",
+    default: "article.html",
+  });
 
-const nameOption = process.argv.includes("--name");
-
-if (nameOption) {
-  console.log(package.name);
-} else {
-  console.log("オプションがありません");
+if (argv.name) {
+  const name = getPackageName();
+  console.log(name);
+  process.exit(0);
 }
+
+const markdownStr = readMarkdownFileSync(path.resolve(__dirname, argv.file));
+const html = marked(markdownStr);
+
+writeHtmlFileSync(path.resolve(__dirname, argv.out), html);
